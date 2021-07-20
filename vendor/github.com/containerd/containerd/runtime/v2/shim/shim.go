@@ -306,15 +306,11 @@ func serve(ctx context.Context, server *ttrpc.Server, path string) error {
 		return err
 	}
 	go func() {
+		defer l.Close()
 		if err := server.Serve(ctx, l); err != nil &&
 			!strings.Contains(err.Error(), "use of closed network connection") {
 			logrus.WithError(err).Fatal("containerd-shim: ttrpc server failure")
 		}
-		l.Close()
-		if address, err := ReadAddress("address"); err == nil {
-			_ = RemoveSocket(address)
-		}
-
 	}()
 	return nil
 }
